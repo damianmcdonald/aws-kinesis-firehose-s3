@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Creates Kinesis Delivery Stream with an S3 Bucket and Lambda for transform and delivery
+
+#########################################################
+#                                                       # 
+#        Start of Parameters section                    #
+#                                                       #
+#########################################################
+Parameters:
+  PrimaryTagName:
+    Description: Name to be used as the primary name tag. For identification purposes.
+    Type: 'String'
+    Default: KINESIS-FIREHOSE-S3
+  SamStackName:
+    Type: String
+    Default: sam-apache-log-to-csv
+    Description: The name of the parent cluster stack that you created. Necessary
+                 to locate and reference resources created by that stack.
+
+#########################################################
+#                                                       # 
+#        Start of Resources section                     #
+#                                                       #
+#########################################################
+Resources:
+
+  # create S3 Bucket
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join ['', ['S3-Bucket-', !Ref 'PrimaryTagName']]
+        - Key: Stack
+          Value: !Ref PrimaryTagName
+
+  # create the IAM role for the Kinesis Delivery Stream
+  KinesisDeliveryStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - firehose.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/AmazonKinesisFirehoseFullAccess"
+      Path: "/"
+      Policies:
+      - PolicyName: KinesisRolePolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:AbortMultipartUpload
+            - s3:GetBucketLocation
+            - s3:GetObject
+            - s3:ListBucket
+            - s3:ListBucketMultipartUploads
+            - s3:PutObject
+            Resource:
+            - !GetAtt S3Bucket.Arn
+            - !Join ['', [!GetAtt S3Bucket.Arn, /*]]
+          - Effect: Allow
+            Action:
+            - lambda:InvokeFunction
+            - lambda:GetFunctionConfiguration
+            Resource:
+              Fn::ImportValue:
+                !Join [':', [!Ref 'SamStackName', 'LambdaFunctionArn']]
+
+  # create the Kinesis delivery stream
+  KinesisDeliveryStream:
+      Type: AWS::KinesisFirehose::DeliveryStream
+      Properties: 
+        DeliveryStreamName: apache-log-stream
+        DeliveryStreamType: DirectPut
+        ExtendedS3DestinationConfiguration: 
+          BucketARN:
+            Fn::GetAtt: 
+              - "S3Bucket"
+              - "Arn"
+          BufferingHints: 
+            IntervalInSeconds: 60
+            SizeInMBs: 1
+          CompressionFormat: UNCOMPRESSED
+          ProcessingConfiguration:
+            Enabled: True
+            Processors:
+              - Type: Lambda
+                Parameters:
+                  - ParameterName: LambdaArn
+                    ParameterValue:
+                      Fn::ImportValue: !Join [':', [!Ref 'SamStackName', 'LambdaFunctionArn']]
+                  - ParameterName: BufferSizeInMBs
+                    ParameterValue: 1
+                  - ParameterName: BufferIntervalInSeconds
+                    ParameterValue: 60
+          RoleARN:
+            Fn::GetAtt: 
+              - "KinesisDeliveryStreamRole"
+              - "Arn"
+
+#########################################################
+#                                                       # 
+#        Start of Outputs section                       #
+#                                                       #
+#########################################################
+Outputs:
+  S3BucketName:
+    Description: The S3 Bucket Name
+    Value:             
+      Fn::GetAtt: 
+        - "S3Bucket"
+        - "DomainName"

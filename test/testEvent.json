@@ -1,0 +1,12 @@
+{
+  "invocationId": "be42a6e8-e98c-4355-978a-cbe4a03a2193",
+  "deliveryStreamArn": "arn:aws:firehose:eu-west-1:961113668792:deliverystream/apache-log-stream",
+  "region": "eu-west-1",
+  "records": [
+    {
+      "recordId": "49604093376703896596543950503716512371992945988103831554000000'",
+      "approximateArrivalTimestamp": "1581343813881",
+      "data": "ODMuMTQ5LjkuMjE2IC0gLSBbMTcvTWF5LzIwMTU6MTA6MDU6NDcgKzAwMDBdICJHRVQgL3ByZXNlbnRhdGlvbnMvbG9nc3Rhc2gtbW9uaXRvcmFtYS0yMDEzL3BsdWdpbi9oaWdobGlnaHQvaGlnaGxpZ2h0LmpzIEhUVFAvMS4xIiAyMDAgMjYxODU="
+    }
+  ]
+}

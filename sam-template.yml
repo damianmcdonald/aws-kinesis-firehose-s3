@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >-
+  An Amazon Kinesis Firehose stream processor that converts input records from
+  Apache Common Log format to CSV.
+
+#########################################################
+#                                                       # 
+#        Start of Resources section                     #
+#                                                       #
+#########################################################
+Resources:
+  KinesisFirehoseApacheLogToCsvFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: >-
+        An Amazon Kinesis Firehose stream processor that converts input records
+        from Apache Common Log format to CSV.
+      MemorySize: 128
+      Handler: index.handler
+      Runtime: nodejs12.x
+      CodeUri: src/
+      Timeout: 3
+      MemorySize: 128
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: ApacheLogToCsv
+
+#########################################################
+#                                                       # 
+#        Start of Outputs section                       #
+#                                                       #
+#########################################################
+Outputs:
+  LambdaFunctionArn:
+    Description: The ARN of the Lambda Function
+    Value:             
+      Fn::GetAtt: 
+        - "KinesisFirehoseApacheLogToCsvFunction"
+        - "Arn"
+    Export:
+      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'LambdaFunctionArn' ] ]

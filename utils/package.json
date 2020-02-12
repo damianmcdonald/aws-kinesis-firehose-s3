@@ -1,0 +1,14 @@
+{
+  "name": "kinesisPutRecord",
+  "description": "A Node.js application which reads an apache log file line by line and puts the line data on a Kinesis Firehose Stream.",
+  "version": "1.0.0",
+  "main": "putRecord.js",
+  "dependencies": {
+    "aws-sdk": "^2.610.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "DCORP",
+  "license": "ISC"
+}

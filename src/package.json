@@ -1,0 +1,11 @@
+{
+  "name": "sam-apache-log-to-csv",
+  "description": "A Node.js application which injects an Apache log file and transforms the log data to csv format.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "DCORP",
+  "license": "ISC"
+}
