@@ -13,7 +13,7 @@ The project provides:
 
 The project architecture is depicted in the diagram below:
 
-![Architecture diagram](assets/architecture.png)
+![Architecture diagram](.assets/architecture.png)
 
 # Prerequisites
 
